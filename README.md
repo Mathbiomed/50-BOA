@@ -103,3 +103,26 @@ R:
         ...
         isRegularized = FALSE
         ...
+
+# Another systems
+The package also includes computational codes for systems exhibiting bi-substrate mechanisms (Fig. 6 in the mauscript) or substrate cooperativity (Fig. 7 in the manuscript).
+
+### Bi-Substrate Mechanisms
+Bi-substrate inhibition can be examined using the `Error_Landscape` located in the **Bi-substrate** folder, adhering to the Excel format specified:
+
+|Column 1|Column 2|Column 3|Column 4|Column 5|Column 6|Column 7|
+|-------|------|------|---|-------|--------------------------|--------------------------|
+| $$V_{max}$$ | $$K_A$$ | $$K_B$$ | $$a$$ | $$IC_{50}$$ | $$A_T$$ for estimating $$IC_{50}$$ | $$B_T$$ for estimating $$IC_{50}$$ |
+| $$A_{T,1}$$ | $$B_{T,1}$$ | $$I_{T,1}$$ | $$V_{0,1}$$ | 0 | 0 | 0 |
+| ...   | ...  | ...  | ... | ...   | ...                      | ...                      |
+| $$A_{T,n}$$ | $$B_{T,n}$$ | $$I_{T,n}$$ | $$V_{0,n}$$ | 0 | 0 | 0 |
+
+### Substrate Cooperativity
+Inhibition involving substrate cooperativity can be analyzed using the `Error_Landscape` script located in the **Cooperativity** folder, following the input format:
+
+|Column 1|Column 2|Column 3|Column 4|
+|-------|------|-------|--------------------------|
+| $$V_{max}$$ | $$K_S$$ | $$IC_{50}$$ | $$S_T$$ for estimating $$IC_{50}$$ |
+| $$S_{T,1}$$ | $$I_{T,1}$$ | $$V_{0,1}$$ | $$a$$ |
+| ...   | ...  | ...   | ... |
+| $$S_{T,n}$$ | $$I_{T,n}$$ | $$V_{0,n}$$ | $$a$$ |
