@@ -13,7 +13,7 @@ Error_Landscape <- function(file_name, L = 10^seq(-3, 3, length.out = 100), isRe
   # 2. CV_Inhibition
   source("CV_Inhibition.R")
   if (isReg) {
-    lambda <- CV_Inhibition(file_name, L)
+    lambda <- CV_Inhibition(file_name, L, isSSRE)
   } else {
     lambda <- 0
   }
@@ -47,7 +47,7 @@ Error_Landscape <- function(file_name, L = 10^seq(-3, 3, length.out = 100), isRe
     V0_boot <- V0[indices]
     
     # Re-estimate parameter using bootstrap sample
-    betaSample[i, ] <- Fit_inhibition(X_boot, V0_boot, C, IC50s, lambda)
+    betaSample[i, ] <- Fit_inhibition(X_boot, V0_boot, C, IC50s, lambda, isSSRE)
   }
   
   # Compute confidence interval
