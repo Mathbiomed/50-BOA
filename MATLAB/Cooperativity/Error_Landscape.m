@@ -1,17 +1,17 @@
-function Error_Landscape(file_name)
+function Error_Landscape(file_name, L, isReg, isSSRE, isMatched)
 %% Load data
 data = readmatrix(file_name);
-
-% Change the heatmap color range
-isMatched = true;
 
 %% 1. BOA_Condition
 BOA_Condition(file_name);
 
 %% 2. CV_Inhibition
 %Range of regularization constant
-L = logspace(-3,3,100);
-lambda = CV_Inhibition(file_name, L);
+if isReg
+    lambda = CV_Inhibition(file_name, L, isSSRE);
+else
+    lambda = 0;
+end
 fprintf('The regularization constant is %.2f.\n', lambda);
 
 %% 3. Estimate Kic and Kiu
@@ -22,7 +22,7 @@ St_setup = data(2:end,1); It_setup = data(2:end,2); V0 = data(2:end,3); a = data
 X_setup = [St_setup It_setup]; C = [Vmax Ks a]; IC50s = [St_IC50 IC50];
 
 %Estimation
-K = Fit_inhibition(X_setup, V0, C, IC50s, lambda);
+K = Fit_inhibition(X_setup, V0, C, IC50s, lambda, isSSRE);
 
 %Compute 95% confidence interval via bootstrapping
 bootSample = 1000;
@@ -35,16 +35,14 @@ for i = 1:bootSample
     V0_boot = V0(indices);
 
     %Re-estimate parameter using bootstrap sample
-    betaSample(i,:) = Fit_inhibition(X_boot, V0_boot, C, IC50s, lambda);
+    betaSample(i,:) = Fit_inhibition(X_boot, V0_boot, C, IC50s, lambda, isSSRE);
 end
 
 %Compute confidence interval
 CI_lower = prctile(betaSample, 2.5);
 CI_upper = prctile(betaSample, 97.5);
-CI = [CI_lower' CI_upper'];
 
 %Estimates of Kic and Kiu
-Estimate = [K' CI];
 fprintf('Kic: %.4f, (%.4f, %.4f)\n', K(1), CI_lower(1), CI_upper(1));
 fprintf('Kiu: %.4f, (%.4f, %.4f)\n', K(2), CI_lower(2), CI_upper(2));
 
@@ -134,17 +132,50 @@ v = K(1)*(K(2)/K(1))^2*(h1(X,C(2),C(1))*h2(X,C(2),C(1)))...
     /(h1(X,C(2),C(1))*h2(X,C(2),C(1)*K(2)/K(1))-2*h1(X,C(2),C(1)*K(2)/K(1))*h2(X,C(2),C(1)));
 end
 
+%% Error structure
+function s = Error_Structure(X, Y, isSSRE)
+if isSSRE
+    s = Y;
+else
+    % User can assign his or her own model of standard deviation to "s" here.
+
+    % Model 1
+    % K1 = 0.011; K2 = 0.04;
+    % s = K1 + K2*Y;
+
+    % Model 2
+    % K1 = 0.036; K2 = 0.008;
+    % s = K1 + K2*Y.^2;
+
+    % Model 3
+    % K1 = 0.05; K2 = 0.889;
+    % s = K1*Y.^K2;
+
+    % Model 4
+    K1 = 0.259; K2 = 0.529; K3 = 0.699; K4 = 0.561; K5 = 0.505;
+    s = K1*X(:,1).^K2./(X(:,1).^K3 + K4*X(:,2).^K5);
+
+    % Model 5
+    % K1 = 0.308; K2 = 0.063; K3 = 0.273; K4 = 0.095;
+    % s = K1*X(:,1)./(K2 + X(:,1) + K3*X(:,1).^2 + K4*X(:,2));
+
+    % Model 6
+    % K1 = 0.308; K2 = 0.063; K3 = 0.273; K4 = 0.095; K5 = 0.007;
+    % s = (K1*X(:,1) + K5*X(:,2))./(K2 + X(:,1) + K3*X(:,1).^2 + K4*X(:,2));
+end
+end
+
 %% Loss function with lambda
-function loss = CV_loss(K, X, Y, C, IC50s, lambda)
+function loss = CV_loss(K, X, Y, C, IC50s, lambda, isSSRE)
 Y_predict = Inhibition(K, X, C);
-loss = mean(((Y-Y_predict)./Y).^2) +...
+loss = mean(((Y-Y_predict)./Error_Structure(X, Y, isSSRE)).^2) +...
                  lambda*mean(((IC50s(:,2)-Cheng_Prusoff(K, IC50s(:,1), [C(2) C(3)]))./IC50s(:,2)).^2);
 end
 
 %% Fitting
-function params = Fit_inhibition(X, Y, C, IC50s, lambda)
+function params = Fit_inhibition(X, Y, C, IC50s, lambda, isSSRE)
 K0 = [max(IC50s(:,2)) max(IC50s(:,2))];
-objFun = @(K)CV_loss(K, X, Y, C, IC50s, lambda);
+objFun = @(K)CV_loss(K, X, Y, C, IC50s, lambda, isSSRE);
 
 options = optimset('Display', 'off');
 params = fminsearch(objFun, K0, options);

@@ -1,16 +1,5 @@
 function Error_Landscape(file_name, L, isReg, isSSRE, isMatched)
-%% Input variables
-% 1. file_name: location of the file that user wants to analyze. It
-% should follow the specific form of Excel file.
-% 2. L: vector representing range of the regularization constant. Default
-% value is logspace(-3, 3, 100)
-% 3. isReg: boolean to determine whether user uses IC50-based
-% regularization for his or her analysis or not. Default value is true.
-% 4. isSSRSE: boolean to determine whether user wants to use sum of squared
-%relative error or customized error structure. Default value is true.
-% 5. isMatched: boolean to determine whether color range of heatmap is
-% [minimal error., 2*minimal error]. Default value is true.
-
+%% Default values of input variables
 if nargin < 5
     isMatched = true;
 end
@@ -23,8 +12,6 @@ end
 if nargin < 2
     L = logspace(-3, 3, 100);
 end
-
-
 %% Load data
 data = readmatrix(file_name);
 
@@ -48,7 +35,7 @@ St_setup = data(2:end,1); It_setup = data(2:end,2); V0 = data(2:end,3);
 X_setup = [St_setup It_setup]; C = [Vmax Km]; IC50s = [St_IC50 IC50];
 
 %Estimation
-K = Fit_inhibition(X_setup, V0, C, IC50s, lambda);
+K = Fit_inhibition(X_setup, V0, C, IC50s, lambda, isSSRE);
 
 %Compute 95% confidence interval via bootstrapping
 bootSample = 1000;
@@ -157,7 +144,7 @@ function s = Error_Structure(X, Y, isSSRE)
 if isSSRE
     s = Y;
 else
-    % User can put his or her own model of stndard deviation here.
+    % User can assign his or her own model of standard deviation to "s" here.
 
     % Model 1
     % K1 = 0.011; K2 = 0.04;

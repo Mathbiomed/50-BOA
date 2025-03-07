@@ -1,18 +1,7 @@
 function Lambda = CV_Inhibition(file_name, L, isSSRE)
-%% Input variable
-% 1. file_name: location of the file that user wants to analyze. It
-% should follow the specific form of Excel file.
-% 2. L: vector representing range of the regularization constant. Default
-% value is logspace(-3, 3, 100)
-% 3. isSSRSE: boolean to determine whether user wants to use sum of squared
-%relative error or customized error structure. Default value is true.
-
-% Default values
+%% Default values of input variable
 if nargin < 3
     isSSRE = true;
-end
-if nargin < 2
-    L = logspace(-3, 3, 100);
 end
 
 %% Load data
@@ -59,7 +48,7 @@ function s = Error_Structure(X, Y, isSSRE)
 if isSSRE
     s = Y;
 else
-    % User can put his or her own model of stndard deviation here.
+    % User can assign his or her own model of standard deviation to "s" here.
 
     % Model 1
     % K1 = 0.011; K2 = 0.04;
