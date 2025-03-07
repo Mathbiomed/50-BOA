@@ -37,7 +37,7 @@ The subsequent rows should list the experimental setups and initial velocities o
 ## 2. Run the 'Error_Landscape.m' or 'Error_Landscape.R' file.
 Once the data is formatted correctly, users can run the package by executing the following line:
 
-    Error_Landscape(dir)
+    Error_Landscape(dir, L, isReg, isSSRE, isMatched)
 Here, 'dir' is the file directory of the Excel-formatted data. Then function 'BOA_Condition' in package automatically checks the conditions for precise and efficient estimation.
 
 If there is no $$I_T$$ value greater than or equal to $$IC_{50}$$, or if there are not two distinct $$S_T$$ ranged within $$(0.2K_M, 5K_M)$$, 'BOA_Condition' will indicate that the experimental data is insufficient and explain why.
@@ -45,6 +45,16 @@ If there is no $$I_T$$ value greater than or equal to $$IC_{50}$$, or if there a
 Otherwise, function 'CV_Inhibition' will perform regularization constant selection, and Error_Landscape will estimate inhibition constants.
 
 The output includes the estimated inhibition constants with their 95% confidence intervals, the regularization constant used, and a heatmap of the error landscape.
+
+The other input variables, 'L', 'isReg', 'isSSRE', and 'isMatched', are hyperparameters meaning that:
+
+'L' is a vector representing the range of the regularization constant. Default value of 'L' is logspace(-3, 3, 100) in MATLAB and 10^seq(-3, 3, length.out = 100) in R.
+
+'isReg' is a boolean to determine whether the IC50-based regularization is incorporated (true) or not (false). Default value of 'isReg' is true in MATLAB and TRUE in R.
+
+'isSSRE' is a boolean to determine whether the loss function for the estimation is a sum of squared relative error (true) or the customized one that user enters in 'Error_Structure' function (false). Default value of 'isSSRE' is true in MATLAB and TRUE in R.
+
+'isMatched' is a boolean to determine whether the color range of the heatmap is from minimal value of objective function to twice of that value (true) or not (false). Default value of 'isMatched' is true in MATLAB and TRUE in R.
 
 
 # Test examples
@@ -74,35 +84,44 @@ We provided initial velocity data for figures in folder 'Figure.'
 
 Users can generate the figures by putting these data into this package.
 
-For Figure 2, 3 and Supplementary Figure 1, you should change the variable 'isMatched' into false in 'Error_Landscape' to change the heatmap color range.
+For Figure 2, 3 and Supplementary Figure 1, you should change the input variable 'isMatched' into false in 'Error_Landscape' to change the heatmap color range.
 
-MATLAB:
-
-        ...
-        isMatched = false;
-        ...
-
-R:
-
-        ...
-        isMatched = FALSE
-        ...
-
-Users also choose whether regularization term is added or not by changing the variable 'isRegularized.'
+Users also choose whether regularization term is added or not by changing the input variable 'isReg.'
 
 Changing 'isRegularized' into false means there is no regularization in fitting process:
 
+# Different error structure
+Default loss function of this package is a sum of squared relative error, which assumes that each data point $$y_i$$ follows the Gaussian distribution whose standard deviation is $$y_i$$.
+
+If users want to consider another type of error structure so that trying to change the form of standard deviation, users can enter their customized model to 'Error_Structure' function in both 'CV_Inhibition' (and 'Error_Landscape' for MATLAB) file(s) by assigning their model to 's'.
+
+For instance:
+
 MATLAB:
 
+    %% Error structure
+    function s = Error_Structure(X, Y, isSSRE)
+    if isSSRE
+        s = Y;
+    else
+        % User can assign his or her own model of standard deviation to "s" here.
+
+        s = Y.^2; % Custom standard deviation model
         ...
-        isRegularized = false;
-        ...
+    end
 
 R:
 
-        ...
-        isRegularized = FALSE
-        ...
+    # Error structure
+    Error_Structure <- function(X, Y, isSSRE) {
+        if (isSSRE) {
+                s <- Y
+        } else {
+                # User can assign his or her own model of standard deviation to "s" here.
+
+                s <- Y ^ 2 # Custom standard deviation model
+        }
+    }
 
 # Another systems
 The package also includes computational codes for systems exhibiting bi-substrate mechanisms (Fig. 6 in the mauscript) or substrate cooperativity (Fig. 7 in the manuscript).
