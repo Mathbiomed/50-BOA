@@ -1,15 +1,9 @@
-Error_Landscape <- function(file_name) {
+Error_Landscape <- function(file_name, L = 10^seq(-3, 3, length.out = 100), isReg = TRUE, isSSRE = TRUE, isMatched = TRUE) {
   # Load data
   library(readxl)
   data <- read_excel(file_name, col_names = c("A", "B", "C", "D"))
   names(data) <- NULL
   data <- as.matrix(data)
-
-  # Set the heatmap color range
-  isMatched <- TRUE
-
-  #Add regularization term
-  isRegularized <- TRUE;
   
   # 1. BOA_Condition
   source("BOA_Condition.R")
@@ -18,9 +12,8 @@ Error_Landscape <- function(file_name) {
   
   # 2. CV_Inhibition
   source("CV_Inhibition.R")
-  if (isRegularized) {
-    L <- 10^seq(-3, 3, length.out = 100)
-    lambda <- CV_Inhibition(file_name, L)
+  if (isReg) {
+    lambda <- CV_Inhibition(file_name, L, isSSRE)
   } else {
     lambda <- 0
   }
@@ -40,7 +33,7 @@ Error_Landscape <- function(file_name) {
   IC50s <- cbind(St_IC50, IC50)
   
   # Estimation
-  K <- Fit_inhibition(X_setup, V0, C, IC50s, lambda)
+  K <- Fit_inhibition(X_setup, V0, C, IC50s, lambda, isSSRE)
   
   # Compute 95% confidence interval via bootstrapping
   bootSample <- 1000
