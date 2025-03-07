@@ -1,24 +1,43 @@
-function Error_Landscape(file_name)
+function Error_Landscape(file_name, L, isReg, isSSRE, isMatched)
+%% Input variables
+% 1. file_name: location of the file that user wants to analyze. It
+% should follow the specific form of Excel file.
+% 2. L: vector representing range of the regularization constant. Default
+% value is logspace(-3, 3, 100)
+% 3. isReg: boolean to determine whether user uses IC50-based
+% regularization for his or her analysis or not. Default value is true.
+% 4. isSSRSE: boolean to determine whether user wants to use sum of squared
+%relative error or customized error structure. Default value is true.
+% 5. isMatched: boolean to determine whether color range of heatmap is
+% [minimal error., 2*minimal error]. Default value is true.
+
+if nargin < 5
+    isMatched = true;
+end
+if nargin < 4
+    isSSRE = true;
+end
+if nargin < 3
+    isReg = true;
+end
+if nargin < 2
+    L = logspace(-3, 3, 100);
+end
+
+
 %% Load data
 data = readmatrix(file_name);
-
-%% Set the heatmap color range
-isMatched = true;
-
-%% Add regularization term
-isRegularized = true;
 
 %% 1. BOA_Condition
 BOA_Condition(file_name);
 
 %% 2. CV_Inhibition
 %Range of regularization constant
-if isRegularized {
-    L = logspace(-3,3,100);
-    lambda = CV_Inhibition(file_name, L);
-} else {
-    lambda = 0
-}
+if isReg
+    lambda = CV_Inhibition(file_name, L, isSSRE);
+else
+    lambda = 0;
+end
 fprintf('The regularization constant is %.2f.\n', lambda);
 
 %% 3. Estimate Kic and Kiu
@@ -42,16 +61,14 @@ for i = 1:bootSample
     V0_boot = V0(indices);
 
     %Re-estimate parameter using bootstrap sample
-    betaSample(i,:) = Fit_inhibition(X_boot, V0_boot, C, IC50s, lambda);
+    betaSample(i,:) = Fit_inhibition(X_boot, V0_boot, C, IC50s, lambda, isSSRE);
 end
 
 %Compute confidence interval
 CI_lower = prctile(betaSample, 2.5);
 CI_upper = prctile(betaSample, 97.5);
-CI = [CI_lower' CI_upper'];
 
 %Estimates of Kic and Kiu
-Estimate = [K' CI];
 fprintf('Kic: %.4f, (%.4f, %.4f)\n', K(1), CI_lower(1), CI_upper(1));
 fprintf('Kiu: %.4f, (%.4f, %.4f)\n', K(2), CI_lower(2), CI_upper(2));
 
@@ -135,18 +152,49 @@ end
 function v = Cheng_Prusoff(K, X, C)
 v = (X + C)*K(1)*K(2)./(C*K(2) + X*K(1));
 end
+%% Error structure
+function s = Error_Structure(X, Y, isSSRE)
+if isSSRE
+    s = Y;
+else
+    % User can put his or her own model of stndard deviation here.
 
+    % Model 1
+    % K1 = 0.011; K2 = 0.04;
+    % s = K1 + K2*Y;
+
+    % Model 2
+    % K1 = 0.036; K2 = 0.008;
+    % s = K1 + K2*Y.^2;
+
+    % Model 3
+    % K1 = 0.05; K2 = 0.889;
+    % s = K1*Y.^K2;
+
+    % Model 4
+    K1 = 0.259; K2 = 0.529; K3 = 0.699; K4 = 0.561; K5 = 0.505;
+    s = K1*X(:,1).^K2./(X(:,1).^K3 + K4*X(:,2).^K5);
+
+    % Model 5
+    % K1 = 0.308; K2 = 0.063; K3 = 0.273; K4 = 0.095;
+    % s = K1*X(:,1)./(K2 + X(:,1) + K3*X(:,1).^2 + K4*X(:,2));
+
+    % Model 6
+    % K1 = 0.308; K2 = 0.063; K3 = 0.273; K4 = 0.095; K5 = 0.007;
+    % s = (K1*X(:,1) + K5*X(:,2))./(K2 + X(:,1) + K3*X(:,1).^2 + K4*X(:,2));
+end
+end
 %% Loss function with lambda
-function loss = CV_loss(K, X, Y, C, IC50s, lambda)
+function loss = CV_loss(K, X, Y, C, IC50s, lambda, isSSRE)
 Y_predict = Inhibition(K, X, C);
-loss = mean(((Y-Y_predict)./Y).^2) +...
+loss = mean(((Y-Y_predict)./Error_Structure(X, Y, isSSRE)).^2) +...
                  lambda*mean(((IC50s(:,2)-Cheng_Prusoff(K, IC50s(:,1), C(2)))./IC50s(:,2)).^2);
 end
 
 %% Fitting
-function params = Fit_inhibition(X, Y, C, IC50s, lambda)
+function params = Fit_inhibition(X, Y, C, IC50s, lambda, isSSRE)
 K0 = [max(IC50s(:,2)) max(IC50s(:,2))];
-objFun = @(K)CV_loss(K, X, Y, C, IC50s, lambda);
+objFun = @(K)CV_loss(K, X, Y, C, IC50s, lambda, isSSRE);
 
 options = optimset('Display', 'off');
 params = fminsearch(objFun, K0, options);

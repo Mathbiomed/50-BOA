@@ -1,4 +1,20 @@
-function Lambda = CV_Inhibition(file_name, L)
+function Lambda = CV_Inhibition(file_name, L, isSSRE)
+%% Input variable
+% 1. file_name: location of the file that user wants to analyze. It
+% should follow the specific form of Excel file.
+% 2. L: vector representing range of the regularization constant. Default
+% value is logspace(-3, 3, 100)
+% 3. isSSRSE: boolean to determine whether user wants to use sum of squared
+%relative error or customized error structure. Default value is true.
+
+% Default values
+if nargin < 3
+    isSSRE = true;
+end
+if nargin < 2
+    L = logspace(-3, 3, 100);
+end
+
 %% Load data
 data = readmatrix(file_name);
 %Data check
@@ -17,7 +33,7 @@ cv_value = zeros(1, numel(L));
 
 for i = 1:numel(L)
     r = L(i);
-    cv_value(i) = CV_error(X_setup, V0, C, IC50s, r);
+    cv_value(i) = CV_error(X_setup, V0, C, IC50s, r, isSSRE);
 end
 
 best_r_idx = cv_value == min(cv_value);
@@ -38,32 +54,63 @@ end
 function v = Cheng_Prusoff(K, X, C)
 v = (X + C)*K(1)*K(2)./(C*K(2) + X*K(1));
 end
+%% Error structure
+function s = Error_Structure(X, Y, isSSRE)
+if isSSRE
+    s = Y;
+else
+    % User can put his or her own model of stndard deviation here.
 
+    % Model 1
+    % K1 = 0.011; K2 = 0.04;
+    % s = K1 + K2*Y;
+
+    % Model 2
+    % K1 = 0.036; K2 = 0.008;
+    % s = K1 + K2*Y.^2;
+
+    % Model 3
+    % K1 = 0.05; K2 = 0.889;
+    % s = K1*Y.^K2;
+
+    % Model 4
+    K1 = 0.259; K2 = 0.529; K3 = 0.699; K4 = 0.561; K5 = 0.505;
+    s = K1*X(:,1).^K2./(X(:,1).^K3 + K4*X(:,2).^K5);
+
+    % Model 5
+    % K1 = 0.308; K2 = 0.063; K3 = 0.273; K4 = 0.095;
+    % s = K1*X(:,1)./(K2 + X(:,1) + K3*X(:,1).^2 + K4*X(:,2));
+
+    % Model 6
+    % K1 = 0.308; K2 = 0.063; K3 = 0.273; K4 = 0.095; K5 = 0.007;
+    % s = (K1*X(:,1) + K5*X(:,2))./(K2 + X(:,1) + K3*X(:,1).^2 + K4*X(:,2));
+end
+end
 %% Loss function with lambda
-function loss = CV_loss(K, X, Y, C, IC50s, lambda)
+function loss = CV_loss(K, X, Y, C, IC50s, lambda, isSSRE)
 Y_predict = Inhibition(K, X, C);
-loss = mean(((Y-Y_predict)./Y).^2) +...
+loss = mean(((Y-Y_predict)./Error_Structure(X, Y, isSSRE)).^2) +...
                  lambda*mean(((IC50s(:,2)-Cheng_Prusoff(K, IC50s(:,1), C(2)))./IC50s(:,2)).^2);
 end
 
 %% Fitting
-function params = Fit_inhibition(X, Y, C, IC50s, lambda)
+function params = Fit_inhibition(X, Y, C, IC50s, lambda, isSSRE)
 K0 = [max(IC50s(:,2)) max(IC50s(:,2))];
-objFun = @(K)CV_loss(K, X, Y, C, IC50s, lambda);
+objFun = @(K)CV_loss(K, X, Y, C, IC50s, lambda, isSSRE);
 
 options = optimset('Display', 'off');
 params = fminsearch(objFun, K0, options);
 end
 
 %% Test error
-function loss = Test_error(Xtrain, Ytrain, Xtest, Ytest, C, IC50s, lambda)
-params = Fit_inhibition(Xtrain, Ytrain, C, IC50s, lambda);
+function loss = Test_error(Xtrain, Ytrain, Xtest, Ytest, C, IC50s, lambda, isSSRE)
+params = Fit_inhibition(Xtrain, Ytrain, C, IC50s, lambda, isSSRE);
 Ypredict = Inhibition(params, Xtest, C);
 loss = mean((Ytest - Ypredict).^2);
 end
 
 %% Cross-validation error
-function loss = CV_error(X, Y, C, IC50s, lambda)
+function loss = CV_error(X, Y, C, IC50s, lambda, isSSRE)
 %Leave-one-out
 cv = cvpartition(height(X), 'LeaveOut');
 
@@ -80,7 +127,7 @@ for i = 1:cv.NumTestSets
     Ytest = Y(testIdx);
 
     %Train & Test
-    loss = Test_error(Xtrain, Ytrain, Xtest, Ytest, C, IC50s, lambda);
+    loss = Test_error(Xtrain, Ytrain, Xtest, Ytest, C, IC50s, lambda, isSSRE);
     loss_set(i) = loss;
 end
 
