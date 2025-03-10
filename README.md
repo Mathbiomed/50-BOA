@@ -137,7 +137,7 @@ Bi-substrate inhibition can be examined using the `Error_Landscape` located in t
 | $$A_{T,n}$$ | $$B_{T,n}$$ | $$I_{T,n}$$ | $$V_{0,n}$$ | 0 | 0 | 0 |
 
 ### Substrate Cooperativity
-Inhibition involving substrate cooperativity with competitive binding can be analyzed using the `Error_Landscape` script located in the **Cooperativity** folder, following the input format:
+Inhibition involving substrate cooperativity can be analyzed using the `Error_Landscape` script located in the **Cooperativity** folder, following the input format:
 
 |Column 1|Column 2|Column 3|Column 4|
 |-------|------|-------|--------------------------|
@@ -147,7 +147,7 @@ Inhibition involving substrate cooperativity with competitive binding can be ana
 | $$S_{T,n}$$ | $$I_{T,n}$$ | $$V_{0,n}$$ | $$a$$ |
 
 ### Inhibitor Cooperativity
-Inhibition involving inhibitor cooperativity can be analyzed using the `Error_Landscape` script located in the **Inhibitor cooperativity** folder, following the input format:
+Inhibition involving inhibitor cooperativity with competitive binding can be analyzed using the `Error_Landscape` script located in the **Inhibitor cooperativity** folder, following the input format:
 
 |Column 1|Column 2|Column 3|Column 4|
 |-------|------|-------|--------------------------|
