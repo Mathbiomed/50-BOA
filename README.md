@@ -137,7 +137,7 @@ Bi-substrate inhibition can be examined using the `Error_Landscape` located in t
 | $$A_{T,n}$$ | $$B_{T,n}$$ | $$I_{T,n}$$ | $$V_{0,n}$$ | 0 | 0 | 0 |
 
 ### Substrate Cooperativity
-Inhibition involving substrate cooperativity can be analyzed using the `Error_Landscape` script located in the **Cooperativity** folder, following the input format:
+Inhibition involving substrate cooperativity with competitive binding can be analyzed using the `Error_Landscape` script located in the **Cooperativity** folder, following the input format:
 
 |Column 1|Column 2|Column 3|Column 4|
 |-------|------|-------|--------------------------|
@@ -145,3 +145,13 @@ Inhibition involving substrate cooperativity can be analyzed using the `Error_La
 | $$S_{T,1}$$ | $$I_{T,1}$$ | $$V_{0,1}$$ | $$a$$ |
 | ...   | ...  | ...   | ... |
 | $$S_{T,n}$$ | $$I_{T,n}$$ | $$V_{0,n}$$ | $$a$$ |
+
+### Inhibitor Cooperativity
+Inhibition involving inhibitor cooperativity can be analyzed using the `Error_Landscape` script located in the **Inhibitor cooperativity** folder, following the input format:
+
+|Column 1|Column 2|Column 3|Column 4|
+|-------|------|-------|--------------------------|
+| $$V_{max}$$ | $$K_S$$ | $$IC_{50}$$ | $$S_T$$ for estimating $$IC_{50}$$ |
+| $$S_{T,1}$$ | $$I_{T,1}$$ | $$V_{0,1}$$ | 0 |
+| ...   | ...  | ...   | ... |
+| $$S_{T,n}$$ | $$I_{T,n}$$ | $$V_{0,n}$$ | 0 |
