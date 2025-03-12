@@ -56,8 +56,8 @@ CI_lower = prctile(betaSample, 2.5);
 CI_upper = prctile(betaSample, 97.5);
 
 %Estimates of Kic and Kiu
-fprintf('Kic: %.4f, (%.4f, %.4f)\n', K(1), CI_lower(1), CI_upper(1));
-fprintf('Kiu: %.4f, (%.4f, %.4f)\n', K(2), CI_lower(2), CI_upper(2));
+fprintf('Ki: %.4f, (%.4f, %.4f)\n', K(1), CI_lower(1), CI_upper(1));
+fprintf('c: %.4f, (%.4f, %.4f)\n', K(2), CI_lower(2), CI_upper(2));
 
 %% Generate error landscape
 %Range of parameter

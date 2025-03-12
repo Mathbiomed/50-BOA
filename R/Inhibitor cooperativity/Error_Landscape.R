@@ -56,8 +56,8 @@ Error_Landscape <- function(file_name, L = 10^seq(-3, 3, length.out = 100), isRe
   
   # Estimates of Kic and Kiu
   Estimate <- cbind(K, CI)
-  cat(sprintf('Kic: %.4f, (%.4f, %.4f)\n', K[1], CI_lower[1], CI_upper[1]))
-  cat(sprintf('Kiu: %.4f, (%.4f, %.4f)\n', K[2], CI_lower[2], CI_upper[2]))
+  cat(sprintf('Ki: %.4f, (%.4f, %.4f)\n', K[1], CI_lower[1], CI_upper[1]))
+  cat(sprintf('c: %.4f, (%.4f, %.4f)\n', K[2], CI_lower[2], CI_upper[2]))
   
   # Generate error landscape
   K_round <- round(log10(IC50))
