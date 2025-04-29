@@ -88,7 +88,9 @@ For Figure 2, 3 and Supplementary Figure 1, you should change the input variable
 
 Users also choose whether regularization term is added or not by changing the input variable 'isReg.'
 
-Changing 'isRegularized' into false means there is no regularization in fitting process:
+Changing 'isRegularized' into false means there is no regularization in fitting process.
+
+Furthermore, datasets used to generate figures and supplementary figures are also provided in this folder.
 
 # Different error structure
 Default loss function of this package is a sum of squared relative error, which assumes that each data point $$y_i$$ follows the Gaussian distribution whose standard deviation is $$y_i$$.
