@@ -157,3 +157,10 @@ Inhibition involving inhibitor cooperativity with competitive binding can be ana
 | $$S_{T,1}$$ | $$I_{T,1}$$ | $$V_{0,1}$$ | 0 |
 | ...   | ...  | ...   | ... |
 | $$S_{T,n}$$ | $$I_{T,n}$$ | $$V_{0,n}$$ | 0 |
+
+# Data generation
+Folder named "Data generation" contains MATLAB codes for generating in silco data that were used in analyses.
+
+"Silico.m" file generate initial velocity data for a typical enzyme inhibition system.
+
+"Silico_Direct_Inhibition.m", "Silico_Cooperativity.m", "Silico_Multiple.m", and "Silico_Inhibitor_Cooperativity.m" are the data generation codes for systems containing direct substrate-inhibitor binding, substrate cooperativity, two types of substrates, and inhibitor cooperativity, respectively.
