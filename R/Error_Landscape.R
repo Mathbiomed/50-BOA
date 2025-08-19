@@ -79,7 +79,7 @@ Error_Landscape <- function(file_name, L = 10^seq(-3, 3, length.out = 100), isRe
       Kicr <- Kicrange[i]
       Kiur <- Kiurange[j]
       K <- c(Kicr, Kiur)
-      total_error[idx] <- CV_loss(K, X_setup, V0, C, IC50s, lambda, isSSRE)
+      total_error[idx] <- CV_loss(K, X_setup, V0, C, IC50s, lambda)
       S1[idx] <- Kicr
       S2[idx] <- Kiur
       idx <- idx + 1
