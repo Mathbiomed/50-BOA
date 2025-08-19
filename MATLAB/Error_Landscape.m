@@ -80,7 +80,7 @@ for i = 1:numel(Kicrange)
         Kicr = Kicrange(i);
         Kiur = Kiurange(j);
         K = [Kicr Kiur];
-        total_error(idx) = CV_loss(K, X_setup, V0, C, IC50s, lambda);
+        total_error(idx) = CV_loss(K, X_setup, V0, C, IC50s, lambda, isSSRE);
         S1(idx) = Kicr; S2(idx) = Kiur;
         idx = idx + 1;
     end
